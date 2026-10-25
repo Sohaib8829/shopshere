@@ -30,3 +30,12 @@
 - X-Cache HIT/MISS dekho (curl -i)
 - Purani cache: TTL ka intezar ya flush_all
 - Password badlo to volume ka purana data dhyan rakho
+
+## Order flow (queue)
+- order-service: DB mai save -> RabbitMQ mai message -> customer ko foran jawab
+- notification-worker: queue se uthata hai, kaam, phir ack
+- Worker band: parchiyan queue mai rukhi rehti hain (RabbitMQ page par Ready count)
+- RabbitMQ web page: http://192.168.56.10:15672
+- /health mai queue: connected/disconnected
+- Worker jaisi service ka port nahi hota (koi use bulata nahi, wo khud queue se uthata hai)
+- Python container mai print(..., flush=True) warna logs der se aate hain
