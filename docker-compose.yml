@@ -1,4 +1,12 @@
 services:
+  frontend:
+    build: ./services/frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - product-service
+      - order-service
+
   product-service:
     build: ./services/product-service
     ports:

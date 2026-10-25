@@ -39,3 +39,11 @@
 - /health mai queue: connected/disconnected
 - Worker jaisi service ka port nahi hota (koi use bulata nahi, wo khud queue se uthata hai)
 - Python container mai print(..., flush=True) warna logs der se aate hain
+
+## Frontend aur Nginx
+- Multi-stage Dockerfile: build dabba (node) -> chhota final dabba (nginx), sirf dist jata hai
+- Nginx reverse proxy: /api/products -> product-service, /api/orders -> order-service
+- Nginx service ka address start par yaad karta hai: service wapas aaye aur 502 rahe to docker compose restart frontend
+- React ki package-lock.json zaroori (npm ci ke liye); node_modules aur dist Git mai nahi
+- Windows shared folder (/vagrant) mai npm install ka masla: VM ke asli folder mai build karo
+- Store: http://192.168.56.10  |  RabbitMQ page: http://192.168.56.10:15672
