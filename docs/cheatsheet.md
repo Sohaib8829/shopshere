@@ -47,3 +47,12 @@
 - React ki package-lock.json zaroori (npm ci ke liye); node_modules aur dist Git mai nahi
 - Windows shared folder (/vagrant) mai npm install ka masla: VM ke asli folder mai build karo
 - Store: http://192.168.56.10  |  RabbitMQ page: http://192.168.56.10:15672
+
+## GitHub Actions (CI)
+- Workflow file: .github/workflows/*.yml (spaces, tab nahi)
+- on: kab chale | jobs: kaam | steps: chhote kaam | runs-on: nayi Ubuntu machine
+- Runner khali hota hai: pehle uses: actions/checkout@v4
+- matrix: aik job ko kai values par aik saath chalana
+- needs: jobs ki tarteeb | if: failure() / always()
+- Step fail = command ka exit code 0 nahi (grep -q se test banta hai)
+- Asli passwords workflow mai nahi, GitHub Secrets mai
