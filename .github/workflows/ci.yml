@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python syntax check
+        run: python3 -m py_compile services/product-service/main.py services/notification-worker/worker.py
+
+      - name: Node syntax check
+        run: node --check services/order-service/server.js
+
+  build:
+    name: build (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [frontend, product-service, order-service, notification-worker]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t shopsphere/${{ matrix.service }}:ci services/${{ matrix.service }}
+
+  smoke-test:
+    name: smoke-test
+    runs-on: ubuntu-latest
+    needs: [checks, build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create .env for testing
+        run: |
+          cat > .env << 'ENVEOF'
+          POSTGRES_USER=shopsphere
+          POSTGRES_PASSWORD=ci-test-pass
+          POSTGRES_DB=shopsphere
+          RABBITMQ_DEFAULT_USER=shopsphere
+          RABBITMQ_DEFAULT_PASS=ci-test-pass
+          ENVEOF
+
+      - name: Start the whole stack
+        run: docker compose up -d --build
+
+      - name: Wait until the store is ready
+        run: |
+          for i in $(seq 1 40); do
+            if curl -sf http://localhost:3000/health | grep -q '"queue":"connected"' && curl -sf http://localhost/api/products > /dev/null; then
+              echo "stack is ready"
+              exit 0
+            fi
+            echo "waiting... ($i)"
+            sleep 5
+          done
+          echo "stack did not become ready in time"
+          exit 1
+
+      - name: Store page loads
+        run: curl -sf http://localhost/ | grep -q "ShopSphere"
+
+      - name: Products API works through nginx
+        run: curl -sf http://localhost/api/products | grep -q "T-Shirt"
+
+      - name: Place an order
+        run: |
+          curl -sf -X POST http://localhost/api/orders \
+            -H "Content-Type: application/json" \
+            -d '{"customer":"CI Bot","items":[{"productId":1,"qty":1}]}' | grep -q '"status":"created"'
+
+      - name: Order is saved in the database
+        run: curl -sf http://localhost/api/orders | grep -q "CI Bot"
+
+      - name: Worker picked the message from the queue
+        run: |
+          sleep 5
+          docker compose logs notification-worker | grep -q "CI Bot"
+
+      - name: Show logs if something failed
+        if: failure()
+        run: docker compose logs
+
+      - name: Clean up
+        if: always()
+        run: docker compose down -v
