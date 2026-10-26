@@ -1,0 +1,22 @@
+name: Hello 
+
+on: 
+  push:
+    workflow_dispatch:
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say Hello
+        run: echo "Assalam o Alaikum from Github Actions"
+
+      - name: Folder abhi khali hai 
+        run: ls -la
+
+      - name: Code uthao
+        uses: actions/checkout@v4
+
+      - name: Ab folder mai hamara code hai
+        run: ls -la    
+
