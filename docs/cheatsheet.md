@@ -56,3 +56,12 @@
 - needs: jobs ki tarteeb | if: failure() / always()
 - Step fail = command ka exit code 0 nahi (grep -q se test banta hai)
 - Asli passwords workflow mai nahi, GitHub Secrets mai
+
+## AWS CLI aur Terraform
+- aws configure (keys ~/.aws/credentials mai, kabhi Git ya chat mai nahi), aws sts get-caller-identity
+- Tarteeb: terraform init -> fmt -> validate -> plan -> apply -> destroy
+- Plan nishan: + banega, ~ badlega, - mitega, -/+ mit kar dobara banega (khatarnak)
+- State (terraform.tfstate) = Terraform ki diary, Git mai nahi
+- .terraform.lock.hcl Git mai jati hai, .terraform/ nahi
+- Har session ke baad terraform destroy (bill bachao)
+- Region: ap-south-1 (Mumbai)
