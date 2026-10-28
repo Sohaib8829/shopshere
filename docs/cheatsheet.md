@@ -65,3 +65,13 @@
 - .terraform.lock.hcl Git mai jati hai, .terraform/ nahi
 - Har session ke baad terraform destroy (bill bachao)
 - Region: ap-south-1 (Mumbai)
+
+## AWS network aur EC2 (Terraform)
+- VPC = nijji network | public subnet = internet se milta hai | private = nahi (database yahan)
+- Internet Gateway + Route Table (0.0.0.0/0) = public ka raasta
+- Security Group = firewall: default mai sab band, jo kholo wahi khulta hai
+- SSH sirf apne IP (/32) se; IP badle to timeout aayega -> tfvars theek karo + apply
+- Key pair: .pub AWS ko, private key kabhi Git/chat mai nahi (~/.ssh mai)
+- Ubuntu EC2 ka user: ubuntu
+- "Container chal raha hai magar bahar se nahi khulta" -> Security Group dekho
+- Aaj ke baad hamesha terraform destroy
