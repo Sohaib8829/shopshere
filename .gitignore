@@ -7,3 +7,4 @@ __pycache__/
 .terraform/
 .vagrant/
 *.tfvars
+infra/ansible/inventory.ini

@@ -75,3 +75,12 @@
 - Ubuntu EC2 ka user: ubuntu
 - "Container chal raha hai magar bahar se nahi khulta" -> Security Group dekho
 - Aaj ke baad hamesha terraform destroy
+
+## Ansible
+- Terraform = ghar banata hai | Ansible = saman rakhta hai (agentless, SSH se)
+- Inventory = servers ki list | Playbook = tasks ki YAML | Module = tayyar kaam (apt, file, service, user)
+- ansible app -i inventory.ini -m ping | -a "uptime" | -m setup (facts)
+- ansible-playbook -i inventory.ini docker.yml --check  (dry run, plan jaisa)
+- become: true = sudo | state: present = "hona chahiye" (idempotent)
+- Dobara chalao: changed=0 = sab theek
+- inventory.ini mai IP badalta hai, Git mai nahi; terraform output -raw app_public_ip se banao
