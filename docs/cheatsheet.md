@@ -84,3 +84,14 @@
 - become: true = sudo | state: present = "hona chahiye" (idempotent)
 - Dobara chalao: changed=0 = sab theek
 - inventory.ini mai IP badalta hai, Git mai nahi; terraform output -raw app_public_ip se banao
+
+## ECR (Docker images ka godam)
+- Registry = godam, Repository = aik service ka khana, Tag = version
+- Aarzi cheezein (EC2) infra/terraform mai, mustaqil (ECR) infra/ecr mai, alag state
+- for_each = aik block se kai resources
+- Login: aws ecr get-login-password --region R | docker login --username AWS --password-stdin REGISTRY
+- Image naam: <registry>/shopsphere/<service>:<tag>
+- docker build -t NAAM . ; docker push NAAM ; docker pull NAAM
+- IMMUTABLE tag: aik baar bana to dobara overwrite nahi (naya tag do)
+- scan_on_push: base image ki vulnerabilities dekho, lifecycle policy: sirf aakhri 10 images
+- latest tag ki jagah hamesha pakka tag (git sha)
