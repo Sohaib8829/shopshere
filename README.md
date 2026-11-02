@@ -8,3 +8,4 @@ Multi-service ecommerce project for learning DevOps.
 - order-service (Node.js Express)
 - notification-worker (Python)
 - PostgreSQL (RDS), Memcached (ElastiCache), RabbitMQ
+
