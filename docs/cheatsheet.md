@@ -95,3 +95,14 @@
 - IMMUTABLE tag: aik baar bana to dobara overwrite nahi (naya tag do)
 - scan_on_push: base image ki vulnerabilities dekho, lifecycle policy: sirf aakhri 10 images
 - latest tag ki jagah hamesha pakka tag (git sha)
+
+## OIDC (CI se AWS, bina chabi ke)
+- IAM User = lambi umar ki chabi | IAM Role = aarzi pass (topi)
+- OIDC: GitHub apna card (token) dikhata hai, AWS verify karke role ka aarzi pass deta hai
+- Trust policy = kaun role pehen sakta hai (repo + branch ki shart)
+- Permission policy = role kya kar sakta hai (sirf hamari ECR repos ka push)
+- Workflow mai: permissions: id-token: write + configure-aws-credentials (role-to-assume)
+- GitHub mai sirf Variables (AWS_ROLE_ARN, AWS_REGION), koi secret nahi
+- Image tag = git commit hash (7 harf), latest nahi
+- Images sirf main se, smoke-test pass hone ke baad
+- Kaam ke baad IAMFullAccess hata do (least privilege)

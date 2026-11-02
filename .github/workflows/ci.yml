@@ -92,3 +92,42 @@ jobs:
       - name: Clean up
         if: always()
         run: docker compose down -v
+
+  publish:
+    name: publish (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    needs: [smoke-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [frontend, product-service, order-service, notification-worker]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get temporary AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push if this commit is not published yet
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          SERVICE: ${{ matrix.service }}
+        run: |
+          TAG=${GITHUB_SHA::7}
+          IMAGE=$REGISTRY/shopsphere/$SERVICE:$TAG
+          if aws ecr describe-images --repository-name shopsphere/$SERVICE --image-ids imageTag=$TAG > /dev/null 2>&1; then
+            echo "$IMAGE already exists, skipping"
+          else
+            docker build -t $IMAGE services/$SERVICE
+            docker push $IMAGE
+          fi
