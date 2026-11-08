@@ -106,3 +106,11 @@
 - Image tag = git commit hash (7 harf), latest nahi
 - Images sirf main se, smoke-test pass hone ke baad
 - Kaam ke baad IAMFullAccess hata do (least privilege)
+
+## OIDC masla (sub claim)
+- Error "Not authorized to perform sts:AssumeRoleWithWebIdentity" = trust policy ki shart mel nahi khayi
+- Andaza mat lagao: workflow se asli claims print karo (sub, aud, repository, ref)
+- GitHub ka naya sub format: repo:OWNER@OWNERID/REPO@REPOID:ref:refs/heads/main (numeric IDs shamil)
+- Policy mai IDs exact rakho (wildcard nahi), IDs secret nahi
+- Policy badalne ke baad naya commit zaroori nahi, failed job re-run karo
+- IAMFullAccess sirf aarzi, kaam ke baad hata do
