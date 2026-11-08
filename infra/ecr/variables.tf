@@ -15,5 +15,5 @@ variable "services" {
 
 variable "github_repo" {
   type        = string
-  description = "GitHub repository allowed to push images, in OWNER/REPO form"
+  description = "Repo as written in the GitHub OIDC sub claim, e.g. OWNER@OWNERID/REPO@REPOID"
 }
