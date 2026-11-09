@@ -114,3 +114,14 @@
 - Policy mai IDs exact rakho (wildcard nahi), IDs secret nahi
 - Policy badalne ke baad naya commit zaroori nahi, failed job re-run karo
 - IAMFullAccess sirf aarzi, kaam ke baad hata do
+
+## RDS, ElastiCache, EC2 role
+- RDS = managed Postgres, ElastiCache = managed cache, dono private subnets mai (publicly_accessible = false)
+- DB subnet group = kam az kam 2 zones ke subnets
+- SG se SG ka rasta: security_groups = [app-sg] (IP nahi)
+- random_password: password code mai nahi, state mai (state Git mai nahi)
+- EC2 IAM role + instance profile: server par koi key nahi (169.254.169.254 se identity)
+- Private test: VM se nc timeout, EC2 se succeeded
+- RDS ab SSL maangta hai (sslmode=require), app mai ssl setting chahiye
+- Kharcha: RDS, ElastiCache, EC2 ghante ke hisaab se, session ke baad terraform destroy
+- Backup: aaj 0 din (seekhne ke liye), asli mai 7+ din, deletion_protection = true
