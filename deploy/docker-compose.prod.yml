@@ -1,0 +1,67 @@
+services:
+  frontend:
+    image: ${REGISTRY}/shopsphere/frontend:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - product-service
+      - order-service
+
+  product-service:
+    image: ${REGISTRY}/shopsphere/product-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: "5432"
+      DB_NAME: shopsphere
+      DB_USER: shopsphere
+      DB_PASSWORD: ${DB_PASSWORD}
+      PGSSLMODE: require
+      CACHE_HOST: ${CACHE_HOST}
+      CACHE_PORT: "11211"
+      CACHE_TTL: "60"
+
+  order-service:
+    image: ${REGISTRY}/shopsphere/order-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: "5432"
+      DB_NAME: shopsphere
+      DB_USER: shopsphere
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: "true"
+      RABBIT_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      QUEUE_NAME: order_created
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notification-worker:
+    image: ${REGISTRY}/shopsphere/notification-worker:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      RABBIT_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      QUEUE_NAME: order_created
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3.13
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  rabbitmqdata:

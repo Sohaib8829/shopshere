@@ -125,3 +125,12 @@
 - RDS ab SSL maangta hai (sslmode=require), app mai ssl setting chahiye
 - Kharcha: RDS, ElastiCache, EC2 ghante ke hisaab se, session ke baad terraform destroy
 - Backup: aaj 0 din (seekhne ke liye), asli mai 7+ din, deletion_protection = true
+
+## Deploy (Ansible + ECR + RDS)
+- Production compose: image: ECR/...:tag (build nahi), sirf frontend ka port 80, restart: unless-stopped
+- Node pg + RDS: ssl chahiye (DB_SSL=true); Python psycopg: PGSSLMODE=require
+- Secrets: ~/.shopsphere/ (repo ke bahar), server par .env mode 0600, no_log: true
+- EC2 ko ECR ki ijazat role se: aws ecr get-login-password | docker login (koi key nahi)
+- Rollback = purana image tag: bash scripts/prepare-deploy.sh <tag> phir deploy.yml
+- Roz ka tareeqa: terraform apply -> prepare-deploy.sh -> docker.yml -> deploy.yml
+- docker kill container: restart policy khud uthati hai; reboot ke baad bhi stack wapas
