@@ -31,3 +31,39 @@ resource "aws_security_group" "app" {
     Name = "${var.project}-app-sg"
   }
 }
+
+resource "aws_security_group" "db" {
+  name        = "${var.project}-db-sg"
+  description = "PostgreSQL from the app server only"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "PostgreSQL from the app security group"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
+  }
+
+  tags = {
+    Name = "${var.project}-db-sg"
+  }
+}
+
+resource "aws_security_group" "cache" {
+  name        = "${var.project}-cache-sg"
+  description = "Memcached from the app server only"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "Memcached from the app security group"
+    from_port       = 11211
+    to_port         = 11211
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
+  }
+
+  tags = {
+    Name = "${var.project}-cache-sg"
+  }
+}
