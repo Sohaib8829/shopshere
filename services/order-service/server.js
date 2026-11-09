@@ -12,6 +12,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || "shopsphere",
   user: process.env.DB_USER || "shopsphere",
   password: process.env.DB_PASSWORD || "",
+  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
 });
 
 let channel = null;
