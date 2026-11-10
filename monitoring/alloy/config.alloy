@@ -1,0 +1,88 @@
+// ---------- Metrics: where to send ----------
+prometheus.remote_write "prom" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+// ---------- Metrics: CPU and memory of every container (cAdvisor inside Alloy) ----------
+prometheus.exporter.cadvisor "containers" {
+  docker_host      = "unix:///var/run/docker.sock"
+  storage_duration = "5m"
+}
+
+prometheus.scrape "cadvisor" {
+  targets         = prometheus.exporter.cadvisor.containers.targets
+  forward_to      = [prometheus.remote_write.prom.receiver]
+  scrape_interval = "15s"
+}
+
+// ---------- Metrics: RabbitMQ (queue depth) ----------
+prometheus.scrape "rabbitmq" {
+  targets         = [{"__address__" = "rabbitmq:15692"}]
+  forward_to      = [prometheus.remote_write.prom.receiver]
+  scrape_interval = "15s"
+}
+
+// ---------- Metrics: is the store alive? (probes) ----------
+prometheus.exporter.blackbox "probes" {
+  config = "{ modules: { http_2xx: { prober: http, timeout: 5s } } }"
+
+  target {
+    name    = "store-page"
+    address = "http://frontend/"
+    module  = "http_2xx"
+  }
+
+  target {
+    name    = "products-api"
+    address = "http://frontend/api/products"
+    module  = "http_2xx"
+  }
+
+  target {
+    name    = "order-service-health"
+    address = "http://order-service:3000/health"
+    module  = "http_2xx"
+  }
+}
+
+prometheus.scrape "probes" {
+  targets         = prometheus.exporter.blackbox.probes.targets
+  forward_to      = [prometheus.remote_write.prom.receiver]
+  scrape_interval = "15s"
+}
+
+// ---------- Logs: every container ----------
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "docker_logs" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.docker.containers.targets
+  labels        = {"platform" = "docker"}
+  relabel_rules = discovery.relabel.docker_logs.rules
+  forward_to    = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

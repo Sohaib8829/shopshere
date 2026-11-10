@@ -134,3 +134,15 @@
 - Rollback = purana image tag: bash scripts/prepare-deploy.sh <tag> phir deploy.yml
 - Roz ka tareeqa: terraform apply -> prepare-deploy.sh -> docker.yml -> deploy.yml
 - docker kill container: restart policy khud uthati hai; reboot ke baad bhi stack wapas
+
+## Monitoring (Prometheus, Loki, Grafana, Alloy)
+- Metrics = numbers waqt ke saath (Prometheus, PromQL) | Logs = text (Loki, LogQL) | Grafana = screen | Alloy = jama karne wala agent
+- Promtail deprecated, uski jagah Alloy. Alloy: component "naam" { ... }, forward_to se jurte hain
+- Alloy yahan: cAdvisor (container CPU/memory), blackbox (probe_success), RabbitMQ :15692, docker logs
+- Overlay compose: docker compose -f docker-compose.yml -f docker-compose.monitoring.yml (alias dcm)
+- Grafana http://192.168.56.10:3001 | Prometheus :9090 | Alloy UI :12345
+- Prometheus alert: expr + for + labels; bina Alertmanager sirf UI mai dikhta hai
+- PromQL: rate(x[1m]), sum by (label) (...), label selector {a="b"}
+- LogQL: {service="x"} |= "text" | |~ "regex" | count_over_time({...}[1m])
+- Pattern: pehle metric/alert se pata chale KUCH kharab, phir logs se pata chale KYUN
+- privileged: true sirf local lab ke liye
