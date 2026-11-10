@@ -1,0 +1,26 @@
+groups:
+  - name: shopsphere
+    rules:
+      - alert: StoreProbeDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.instance }} is not answering"
+
+      - alert: OrderQueueBacklog
+        expr: sum(rabbitmq_queue_messages_ready) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 5 orders are waiting for the notification worker"
+
+      - alert: ContainerHighMemory
+        expr: container_memory_working_set_bytes{container_label_com_docker_compose_service!=""} > 400 * 1024 * 1024
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.container_label_com_docker_compose_service }} uses more than 400 MB"
